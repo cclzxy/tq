@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>点评</title>
+  <meta content="width=device-width, initial-scale=1"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+
+  <script src="js/vue.js"></script>
+  <link href="css/style.css" rel="stylesheet" type="text/css" media="all"/>
+</head>
+<body>
+<a id="u_name" th:text="${session.userName}"></a>
+
+<div class="loader" id="loader">
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+</div>
+<div id="app" class="app" v-cloak style="display: none">
+
+  <!-- 蒙层选择班级-->
+  <div id="alertmsg" onclick="selclaidhide()">
+    <div id="alertcont" onclick="stopp()">
+        <p id="alertail">
+          <button class="titledetail1">已点评</button>   <button class="titledetail2">未点评</button>
+        </p>
+        <button :class="{comp:ifcomp[index]>=1}"  onclick="selclassid(this)" class="selbutn" v-for="(aclass,index) in allclasses" :value="index+1">{{aclass}}</button>
+    </div>
+  </div>
+  <!-- 蒙层弹框-->
+  <div id="alertmsg2" onclick="selclaidhide2()">
+    <div id="alertcont2" onclick="stopp()">
+      <p id="laertsubmit">您确认要提交<strong>{{nowclass}}</strong>的评比吗?</p>
+      <button id="laertsubmitbtn" onclick="upload()">确认</button>
+    </div>
+  </div>
+  <input type="button" id="claselect" value="1" >
+  <h2 id="title">今日点评&nbsp&nbsp{{noweek}}</h2>
+  <div class="maincomment">
+    <div id="pb">
+      <!--选择年级-->
+      <div class="selclass">
+        <button onclick="selclaidshow()">{{nowclass}}</button>
+      </div>
+      <!--上午下午文字-->
+      <div id="noontext">
+        <span id="ntext">{{mora}}</span>
+      </div>
+      <!--滑动按钮-->
+        <div id="changen" class="toggle toggle--daynight">
+          <input @click="checkedif" onchange="selclassid(this)" type="checkbox" id="t" class="toggle--checkbox">
+          <label class="toggle--btn" for="t"></label>
+        </div>
+
+    </div>
+    <!--总项目-->
+    <div id="itemdiv">
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">包干区（10分）</div>
+        <div class="addmins">
+          <button v-show="ifping11" class="btscore" @click="addscore1">+</button>
+          <div class="score" :class="{abc:abc1}">{{score1}}</div>
+          <button v-show="ifping12" class="btscore" @click="minusscore1">-</button>
+        </div>
+        <!-- 扣分项-->
+        <div v-show="detail1" class="minscore">
+          <input id="f11" :class="{ba:baif11}" @click="bacolor11()" class="button11" type="button"
+                 :value="details[0].one"/>
+          <input id="s12" :class="{ba:baif12}" @click="bacolor12()" class="button11" type="button"
+                 :value="details[0].two"/>
+          <input id="t13" :class="{ba:baif13}" @click="bacolor13()" class="button11" type="button"
+                 :value="details[0].three"/>
+        </div>
+        <!--评论+上传图片-->
+        <div id="addcoment1">
+          <input id="f15" type="text" placeholder="添加说明"/>
+          <div id="upimage">
+            <input type="file" onchange="picture()" name="image" id="imagesrc" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改评论+上传图片-->
+        <div v-show="isshow1" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange12"  type="text" placeholder="描述:"/>
+          </div>
+          <div class="addimg">
+            <input id="imagesrc11" type="file" onchange="picture11()" name="image"
+                   accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate1()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail11" class="updbt">
+          <div class="det">{{det1}}</div>
+          <div class="but">
+            <button @click="changede1">修改</button>
+          </div>
+        </div>
+        <!--补充按钮-->
+        <div class="addcom">
+          <input v-show="ifping" id="f14" @click="showdetail1" type="button"
+                 :value="details[0].others"/>
+        </div>
+      </div>
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">室内卫生（5.0分）</div>
+        <div class="addmins">
+          <button v-show="ifping21" class="btscore" @click="addscore2">+</button>
+          <div class="score" :class="{abc:abc2}">{{score2}}</div>
+          <button v-show="ifping22" class="btscore" @click="minusscore2">-</button>
+        </div>
+        <!-- 扣分项-->
+        <div v-show="detail2" class="minscore">
+          <input id="f21" :class="{ba:baif21}" @click="bacolor21()" class="button11" type="button"
+                 :value="details[1].one"/>
+          <input id="s22" :class="{ba:baif22}" @click="bacolor22()" class="button11" type="button"
+                 :value="details[1].two"/>
+          <input id="t23" :class="{ba:baif23}" @click="bacolor23()" class="button11" type="button"
+                 :value="details[1].three"/>
+        </div>
+        <!--评论-->
+        <div id="addcoment2">
+          <input id="f25" type="text" placeholder="添加说明">
+          <div id="upimage2">
+            <input type="file" onchange="picture2()" name="image" id="imagesrc2" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改扣分项-->
+        <div v-show="isshow2" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange22" type="text" placeholder="描述："/>
+          </div>
+            <div class="addimg">
+            <input id="imagesrc22" type="file" onchange="picture22()" name="image" accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate2()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail22" class="updbt">
+          <div class="det">{{det2}}</div>
+          <div class="but">
+            <button @click="changede2">修改</button>
+          </div>
+        </div>
+
+        <!--补充-->
+        <div class="addcom">
+          <input v-show="ifping" id="f24" @click="showdetail2" type="button"
+                 :value="details[1].others"/>
+        </div>
+      </div>
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">工具摆放（2.5分）</div>
+        <div class="addmins">
+          <button v-show="ifping31" class="btscore" @click="addscore3">+</button>
+          <div class="score" :class="{abc:abc3}">{{score3}}</div>
+          <button v-show="ifping32" class="btscore" @click="minusscore3">-</button>
+        </div>
+        <!--扣分项-->
+        <div v-show="detail3" class="minscore">
+          <input id="f31" :class="{ba:baif31}" @click="bacolor31()" class="button11" type="button"
+                 :value="details[2].one"/>
+          <input id="s32" :class="{ba:baif32}" @click="bacolor32()" class="button11" type="button"
+                 :value="details[2].two"/>
+          <input id="t33" :class="{ba:baif33}" @click="bacolor33()" class="button11" type="button"
+                 :value="details[2].three"/>
+        </div>
+        <!--评论-->
+        <div id="addcoment3">
+          <input id="f35" type="text" placeholder="添加说明"/>
+          <div id="upimage3">
+            <input type="file" onchange="picture3()" name="image" id="imagesrc3" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改扣分项-->
+        <div v-show="isshow3" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange32" type="text" placeholder="描述："/>
+          </div>
+            <div class="addimg">
+            <input id="imagesrc33" type="file" onchange="picture33()" name="image" accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate3()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail33" class="updbt">
+          <div class="det">{{det3}}</div>
+          <div class="but">
+            <button @click="changede3">修改</button>
+          </div>
+        </div>
+
+        <!--补充-->
+        <div class="addcom">
+          <input v-show="ifping" id="f34" @click="showdetail3" type="button"
+                 :value="details[2].others"/>
+        </div>
+      </div>
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">走廊（2.5分）</div>
+        <div class="addmins">
+          <button v-show="ifping41" class="btscore" @click="addscore4">+</button>
+          <div class="score" :class="{abc:abc4}">{{score4}}</div>
+          <button v-show="ifping42" class="btscore" @click="minusscore4">-</button>
+        </div>
+        <!--扣分项-->
+        <div v-show="detail4" class="minscore">
+          <input id="f41" :class="{ba:baif41}" @click="bacolor41()" class="button11" type="button"
+                 :value="details[3].one"/>
+          <input id="s42" :class="{ba:baif42}" @click="bacolor42()" class="button11" type="button"
+                 :value="details[3].two"/>
+          <input id="t43" :class="{ba:baif43}" @click="bacolor43()" class="button11" type="button"
+                 :value="details[3].three"/>
+        </div>
+        <!--评论-->
+        <div id="addcoment4">
+          <input id="f45" type="text" placeholder="添加说明">
+          <div id="upimage4">
+            <input type="file" onchange="picture4()" name="image" id="imagesrc4" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改扣分项-->
+        <div v-show="isshow4" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange42" type="text" placeholder="描述："/>
+          </div>
+            <div class="addimg">
+            <input id="imagesrc44" type="file" onchange="picture44()" name="image" accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate4()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail44" class="updbt">
+          <div class="det">{{det4}}</div>
+          <div class="but">
+            <button @click="changede4">修改</button>
+          </div>
+        </div>
+
+        <!--补充-->
+        <div class="addcom">
+          <input v-show="ifping" id="f44" @click="showdetail4" type="button"
+                 :value="details[3].others"/>
+        </div>
+      </div>
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">窗台（2.5分）</div>
+        <div class="addmins">
+          <button v-show="ifping51" class="btscore" @click="addscore5">+</button>
+          <div class="score" :class="{abc:abc5}">{{score5}}</div>
+          <button v-show="ifping52" class="btscore" @click="minusscore5">-</button>
+        </div>
+        <!--       扣分项-->
+        <div v-show="detail5" class="minscore">
+          <input id="f51" :class="{ba:baif51}" @click="bacolor51()" class="button11" type="button"
+                 :value="details[4].one"/>
+          <input id="s52" :class="{ba:baif52}" @click="bacolor52()" class="button11" type="button"
+                 :value="details[4].two"/>
+          <input id="t53" :class="{ba:baif53}" @click="bacolor53()" class="button11" type="button"
+                 :value="details[4].three"/>
+        </div>
+        <!--评论-->
+        <div id="addcoment5">
+          <input id="f55" type="text" placeholder="添加说明">
+          <div id="upimage5">
+            <input type="file" onchange="picture5()" name="image" id="imagesrc5" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改扣分项-->
+        <div v-show="isshow5" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange52" type="text" placeholder="描述："/>
+          </div>
+            <div class="addimg">
+            <input id="imagesrc55" type="file" onchange="picture55()" name="image" accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate5()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail55" class="updbt">
+          <div class="det">{{det5}}</div>
+          <div class="but">
+            <button @click="changede5">修改</button>
+          </div>
+        </div>
+
+        <!--补充-->
+        <div class="addcom">
+          <input v-show="ifping" id="f54" @click="showdetail5" type="button"
+                 :value="details[4].others"/>
+        </div>
+      </div>
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">瓷砖门窗（2.5分）</div>
+        <div class="addmins">
+          <button v-show="ifping61" class="btscore" @click="addscore6">+</button>
+          <div class="score" :class="{abc:abc6}">{{score6}}</div>
+          <button v-show="ifping62" class="btscore" @click="minusscore6">-</button>
+        </div>
+        <!--       扣分项-->
+        <div v-show="detail6" class="minscore">
+          <input id="f61" :class="{ba:baif61}" @click="bacolor61()" class="button11" type="button"
+                 :value="details[5].one"/>
+          <input id="s62" :class="{ba:baif62}" @click="bacolor62()" class="button11" type="button"
+                 :value="details[5].two"/>
+          <input id="t63" :class="{ba:baif63}" @click="bacolor63()" class="button11" type="button"
+                 :value="details[5].three"/>
+        </div>
+        <!--评论-->
+        <div id="addcoment6">
+          <input id="f65" type="text" placeholder="添加说明">
+          <div id="upimage6">
+            <input type="file" onchange="picture6()" name="image" id="imagesrc6" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改扣分项-->
+        <div v-show="isshow6" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange62" type="text" placeholder="描述："/>
+          </div>
+            <div class="addimg">
+            <input id="imagesrc66" type="file" onchange="picture66()" name="image" accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate6()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail66" class="updbt">
+          <div class="det">{{det6}}</div>
+          <div class="but">
+            <button @click="changede6">修改</button>
+          </div>
+        </div>
+
+        <!--补充-->
+        <div class="addcom">
+          <input v-show="ifping" id="f64" @click="showdetail6" type="button"
+                 :value="details[5].others"/>
+        </div>
+      </div>
+      <!------------------------------------------------------------------------------------------------------------>
+      <div class="itemdivs">
+        <div class="itemname">多媒体讲台（2.5分）</div>
+        <div class="addmins">
+          <button v-show="ifping71" class="btscore" @click="addscore7">+</button>
+          <div class="score" :class="{abc:abc7}">{{score7}}</div>
+          <button v-show="ifping72" class="btscore" @click="minusscore7">-</button>
+        </div>
+        <!--       扣分项-->
+        <div v-show="detail7" class="minscore">
+          <input id="f71" :class="{ba:baif71}" @click="bacolor71()" class="button11" type="button"
+                 :value="details[6].one"/>
+          <input id="s72" :class="{ba:baif72}" @click="bacolor72()" class="button11" type="button"
+                 :value="details[6].two"/>
+          <input id="t73" :class="{ba:baif73}" @click="bacolor73()" class="button11" type="button"
+                 :value="details[6].three"/>
+        </div>
+        <!--评论-->
+        <div id="addcoment7">
+          <input id="f75" type="text" placeholder="添加说明">
+          <div id="upimage7">
+            <input type="file" onchange="picture7()" name="image" id="imagesrc7" accept="image/*"/>
+          </div>
+        </div>
+        <!--重新修改扣分项-->
+        <div v-show="isshow7" class="addctns">
+          <div class="showifchange2">
+          <input id="showifchange72" type="text" placeholder="描述："/>
+          </div>
+           <div class="addimg">
+            <input id="imagesrc77" type="file" onchange="picture77()" name="image" accept="image/*"/>
+            <button class="showifchange4" onclick="confirmupdate7()">确认</button>
+          </div>
+        </div>
+        <!--评分已完成展示+修改按钮-->
+        <div v-show="detail77" class="updbt">
+          <div class="det">{{det7}}</div>
+          <div class="but">
+            <button @click="changede7">修改</button>
+          </div>
+        </div>
+        <!--补充-->
+        <div class="addcom">
+          <input v-show="ifping" id="f74" @click="showdetail7" type="button"
+                 :value="details[6].others"/>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="issubmit1" id="subm">
+      <div id="scoreshowif">
+        总分:{{score1+score2+score3+score4+score5+score6+score7}}分
+      </div>
+      <button id="itemsubmit" onclick="showalert()">提 交</button>
+    </div>
+
+  </div>
+
+</div>
+<!--日期-->
+<div style="display: none">
+  <input type="text" name="Username" id="date" placeholder="日期"/>
+</div>
+</body>
+<script src="js/login.js"></script>
+<script src="js/appajax.js"></script>
+<script src="js/vueapp.js"></script>
+</html>
